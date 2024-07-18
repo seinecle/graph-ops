@@ -17,31 +17,7 @@
         </dependency>
         <dependency>
             <groupId>org.gephi</groupId>
-            <artifactId>graph-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.gephi</groupId>
-            <artifactId>io-importer-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.gephi</groupId>
-            <artifactId>io-importer-plugin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-filesystems</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.modules</groupId>
-            <artifactId>org-netbeans-modules-masterfs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.gephi</groupId>
-            <artifactId>appearance-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.gephi</groupId>
-            <artifactId>appearance-plugin</artifactId>
+            <artifactId>gephi-toolkit</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.json</groupId>
@@ -51,6 +27,18 @@
         <dependency>
             <groupId>org.eclipse.parsson</groupId>
             <artifactId>parsson</artifactId>
+        </dependency>
+        <!--for tests-->        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.clementlevallois.functions</groupId>
+            <artifactId>GexfVosViewerJson</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
