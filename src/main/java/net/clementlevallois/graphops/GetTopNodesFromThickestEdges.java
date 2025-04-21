@@ -54,7 +54,8 @@ public class GetTopNodesFromThickestEdges {
     Map<Edge, Double> topWeightEdges;
     InputStream is;
     String gexf;
-
+    private final Object lock = new Object();
+    
     public GetTopNodesFromThickestEdges(Path filePath) {
         this.filePath = filePath;
     }
@@ -86,36 +87,49 @@ public class GetTopNodesFromThickestEdges {
     }
 
     private void load() throws FileNotFoundException {
-        ProjectController projectController = Lookup.getDefault().lookup(ProjectController.class);
-        GraphController graphController = Lookup.getDefault().lookup(GraphController.class);
-        ImportController importController = Lookup.getDefault().lookup(ImportController.class);
-        projectController.newProject();
+        ProjectController projectController = null;
         Container container = null;
-        if (filePath != null) {
-            File file = filePath.toFile();
-            container = importController.importFile(file);
-            container.closeLoader();
-        } else if (is != null) {
-            FileImporter fi = new ImporterGEXF();
-            container = importController.importFile(is, fi);
-            container.closeLoader();
-        } else if (gexf != null) {
-            FileImporter fi = new ImporterGEXF();
-            container = importController.importFile(new StringReader(gexf), fi);
-            container.closeLoader();
+
+        synchronized (lock) {
+            try {
+                projectController = Lookup.getDefault().lookup(ProjectController.class);
+                GraphController graphController = Lookup.getDefault().lookup(GraphController.class);
+                ImportController importController = Lookup.getDefault().lookup(ImportController.class);
+                projectController.newProject();
+                if (filePath != null) {
+                    File file = filePath.toFile();
+                    container = importController.importFile(file);
+                    container.closeLoader();
+                } else if (is != null) {
+                    FileImporter fi = new ImporterGEXF();
+                    container = importController.importFile(is, fi);
+                    container.closeLoader();
+                } else if (gexf != null) {
+                    FileImporter fi = new ImporterGEXF();
+                    container = importController.importFile(new StringReader(gexf), fi);
+                    container.closeLoader();
+                }
+                DefaultProcessor processor = new DefaultProcessor();
+                processor.setWorkspace(projectController.getCurrentWorkspace());
+                processor.setContainers(new ContainerUnloader[]{container.getUnloader()});
+                processor.process();
+                gm = graphController.getGraphModel();
+            } finally {
+                if (projectController != null) {
+                    projectController.closeCurrentWorkspace();
+                    projectController.closeCurrentProject();
+                }
+                if (container != null) {
+                    container.closeLoader();
+                }
+            }
         }
-        DefaultProcessor processor = new DefaultProcessor();
-        processor.setWorkspace(projectController.getCurrentWorkspace());
-        processor.setContainers(new ContainerUnloader[]{container.getUnloader()});
-        processor.process();
-        gm = graphController.getGraphModel();
     }
 
     private JsonObjectBuilder addNodes(int topNodes) {
         JsonObjectBuilder nodesObjectBuilder = Json.createObjectBuilder();
 
         Map<Edge, Double> mapEdgesToTheirWeight = new HashMap();
-
 
         EdgeIterable edges = gm.getGraph().getEdges();
         Iterator<Edge> iterator = edges.iterator();
@@ -145,9 +159,7 @@ public class GetTopNodesFromThickestEdges {
     private JsonObjectBuilder addEdges() {
         JsonObjectBuilder edgesObjectBuilder = Json.createObjectBuilder();
 
-        Iterator<Map.Entry<Edge, Double>> iteratorTopWeightEdges = topWeightEdges.entrySet().iterator();
-        while (iteratorTopWeightEdges.hasNext()) {
-            Map.Entry<Edge, Double> next = iteratorTopWeightEdges.next();
+        for (Map.Entry<Edge, Double> next : topWeightEdges.entrySet()) {
             if (nodesInGraph.contains((String) next.getKey().getSource().getId()) && nodesInGraph.contains((String) next.getKey().getTarget().getId())) {
                 edgesObjectBuilder.add((String) next.getKey().getId(), Json.createObjectBuilder()
                         .add("source", (String) next.getKey().getSource().getId())
