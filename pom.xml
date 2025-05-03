@@ -20,6 +20,11 @@
             <artifactId>gephi-toolkit</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.clementlevallois.functions</groupId>
+            <artifactId>functions-model</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
         </dependency>
